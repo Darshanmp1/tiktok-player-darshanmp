@@ -40,20 +40,20 @@ function VideoCard({ video }) {
 
   const handleTap = (e) => {
     const now = Date.now();
-    const DOUBLE_TAP_DELAY = 300;
+    const DOUBLE_TAP_DELAY = 400;
 
     if (now - lastTapRef.current < DOUBLE_TAP_DELAY) {
-      // Double tap detected
       handleDoubleTap(e);
+      lastTapRef.current = 0; // Reset to prevent triple-tap firing double-tap twice
     } else {
-      // Single tap logic (with a slight delay to allow double-tap)
+      lastTapRef.current = now;
       setTimeout(() => {
-        if (Date.now() - lastTapRef.current >= DOUBLE_TAP_DELAY) {
+        // If no second tap happened within the window
+        if (lastTapRef.current === now) {
           togglePlayPause();
         }
       }, DOUBLE_TAP_DELAY);
     }
-    lastTapRef.current = now;
   };
 
   const togglePlayPause = () => {
