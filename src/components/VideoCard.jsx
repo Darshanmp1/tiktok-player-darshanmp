@@ -9,6 +9,7 @@ function VideoCard({ video }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [showIcon, setShowIcon] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -128,9 +129,29 @@ function VideoCard({ video }) {
         <p style={{ fontWeight: "bold", fontSize: "16px" }}>
           @{video.user.name}
         </p>
-        <p style={{ fontSize: "14px", opacity: 0.9, maxWidth: "250px" }}>
-          {video.description}
-        </p>
+        <div style={{ fontSize: "14px", opacity: 0.9, maxWidth: "250px" }}>
+          <p style={{
+            margin: 0,
+            overflow: "hidden",
+            display: "-webkit-box",
+            WebkitLineClamp: isExpanded ? "unset" : 2,
+            WebkitBoxOrient: "vertical",
+            textOverflow: "ellipsis",
+          }}>
+            {video.description}
+          </p>
+          {!isExpanded && video.description.length > 50 && (
+            <span 
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsExpanded(true);
+              }}
+              style={{ fontWeight: "bold", cursor: "pointer", display: "inline-block", marginTop: "4px" }}
+            >
+              ... more
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Action Bar */}
