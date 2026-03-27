@@ -18,6 +18,7 @@ function VideoCard({ video }) {
   const [hearts, setHearts] = useState([]);
   const [isHolding, setIsHolding] = useState(false);
   const [isBuffering, setIsBuffering] = useState(false);
+  const [isIntersecting, setIsIntersecting] = useState(false);
 
   useEffect(() => {
     const videoElem = videoRef.current;
@@ -25,6 +26,7 @@ function VideoCard({ video }) {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
+          setIsIntersecting(entry.isIntersecting);
           if (entry.isIntersecting) {
             videoElem.play();
             setIsPlaying(true);
@@ -60,6 +62,19 @@ function VideoCard({ video }) {
       videoElem.removeEventListener("stalled", handleWaiting);
     };
   }, []);
+
+  // Global Keydown Listener for Space Bar
+  useEffect(() => {
+    const handleGlobalKeyDown = (e) => {
+      if (e.code === "Space" && isIntersecting) {
+        e.preventDefault();
+        togglePlayPause();
+      }
+    };
+
+    window.addEventListener("keydown", handleGlobalKeyDown);
+    return () => window.removeEventListener("keydown", handleGlobalKeyDown);
+  }, [isIntersecting, isPlaying]);
 
   const handlePointerDown = (e) => {
     isLongPressingRef.current = false;
