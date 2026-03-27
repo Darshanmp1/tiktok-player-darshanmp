@@ -1,3 +1,5 @@
+import { formatCount } from "../utils";
+
 function ActionBar({ video, liked, setLiked }) {
   return (
     <div style={{
@@ -29,7 +31,7 @@ function ActionBar({ video, liked, setLiked }) {
           {liked ? "❤️" : "🤍"}
         </span>
         <span style={{ fontSize: "12px", color: "white", marginTop: "4px" }}>
-          {video.likes + (liked ? 1 : 0)}
+          {formatCount(video.likes + (liked ? 1 : 0))}
         </span>
       </div>
 
@@ -40,7 +42,7 @@ function ActionBar({ video, liked, setLiked }) {
       >
         <span style={{ fontSize: "28px", filter: "brightness(0) invert(1)" }}>💬</span>
         <span style={{ fontSize: "12px", color: "white", marginTop: "4px" }}>
-          {video.comments}
+          {formatCount(video.comments)}
         </span>
       </div>
 
@@ -62,7 +64,7 @@ function ActionBar({ video, liked, setLiked }) {
       >
         <span style={{ fontSize: "28px", filter: "brightness(0) invert(1)" }}>➦</span>
         <span style={{ fontSize: "12px", color: "white", marginTop: "4px" }}>
-          {video.shares}
+          {formatCount(video.shares)}
         </span>
       </div>
     </div>

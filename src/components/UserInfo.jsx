@@ -4,6 +4,23 @@ function UserInfo({ video }) {
   const [isFollowing, setIsFollowing] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
 
+  const renderCaption = (text) => {
+    return text.split(" ").map((word, i) => {
+      if (word.startsWith("#")) {
+        return (
+          <span
+            key={i}
+            onClick={(e) => e.stopPropagation()}
+            style={{ color: "#69C9D0", cursor: "pointer" }}
+          >
+            {word}{" "}
+          </span>
+        );
+      }
+      return <span key={i}>{word} </span>;
+    });
+  };
+
   return (
     <div style={{
       position: "absolute",
@@ -62,7 +79,7 @@ function UserInfo({ video }) {
         @{video.user.name}
       </p>
 
-      {/* Caption/Description */}
+      {/* Caption/Description with Hashtag Highlighting */}
       <div style={{ fontSize: "14px", opacity: 0.9, maxWidth: "250px" }}>
         <p style={{
           margin: 0,
@@ -72,7 +89,7 @@ function UserInfo({ video }) {
           WebkitBoxOrient: "vertical",
           textOverflow: "ellipsis",
         }}>
-          {video.description}
+          {renderCaption(video.description)}
         </p>
         {!isExpanded && video.description.length > 50 && (
           <span 
