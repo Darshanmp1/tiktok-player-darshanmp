@@ -1,6 +1,7 @@
 import { useRef, useEffect, useState } from "react";
 import ActionBar from "./ActionBar";
 import ProgressBar from "./ProgressBar";
+import MusicDisc from "./MusicDisc";
 
 function VideoCard({ video }) {
   const videoRef = useRef(null);
@@ -137,6 +138,9 @@ function VideoCard({ video }) {
 
       {/* Progress Bar */}
       <ProgressBar videoRef={videoRef} />
+
+      {/* Music Disc */}
+      <MusicDisc isPlaying={isPlaying} />
     </div>
   );
 }
