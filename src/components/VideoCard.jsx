@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState } from "react";
+import ActionBar from "./ActionBar";
 
 function VideoCard({ video }) {
   const videoRef = useRef(null);
@@ -129,6 +130,9 @@ function VideoCard({ video }) {
           {video.description}
         </p>
       </div>
+
+      {/* Action Bar */}
+      <ActionBar video={video} />
     </div>
   );
 }
