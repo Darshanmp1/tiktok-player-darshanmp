@@ -6,7 +6,7 @@ import MusicDisc from "./MusicDisc";
 function VideoCard({ video }) {
   const videoRef = useRef(null);
   const containerRef = useRef(null);
-  const lastTapRef = useRef(0);
+  const tapTimeoutRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [showIcon, setShowIcon] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
@@ -39,20 +39,19 @@ function VideoCard({ video }) {
   }, []);
 
   const handleTap = (e) => {
-    const now = Date.now();
-    const DOUBLE_TAP_DELAY = 400;
-
-    if (now - lastTapRef.current < DOUBLE_TAP_DELAY) {
+    if (e.detail === 2) {
+      // Double tap detected via native detail
+      if (tapTimeoutRef.current) {
+        clearTimeout(tapTimeoutRef.current);
+        tapTimeoutRef.current = null;
+      }
       handleDoubleTap(e);
-      lastTapRef.current = 0; // Reset to prevent triple-tap firing double-tap twice
-    } else {
-      lastTapRef.current = now;
-      setTimeout(() => {
-        // If no second tap happened within the window
-        if (lastTapRef.current === now) {
-          togglePlayPause();
-        }
-      }, DOUBLE_TAP_DELAY);
+    } else if (e.detail === 1) {
+      // Single tap - wait for a potential second tap
+      tapTimeoutRef.current = setTimeout(() => {
+        togglePlayPause();
+        tapTimeoutRef.current = null;
+      }, 300);
     }
   };
 
@@ -65,21 +64,19 @@ function VideoCard({ video }) {
       setIsPlaying(true);
     }
     setShowIcon(true);
-    setTimeout(() => setShowIcon(false), 1000);
+    setTimeout(() => setShowIcon(false), 800);
   };
 
   const handleDoubleTap = (e) => {
     setLiked(true);
     
-    // Get coordinates relative to container
     const rect = containerRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
-    const newHeart = { id: Date.now(), x, y };
+    const newHeart = { id: Math.random(), x, y };
     setHearts((prev) => [...prev, newHeart]);
 
-    // Remove heart after animation
     setTimeout(() => {
       setHearts((prev) => prev.filter((h) => h.id !== newHeart.id));
     }, 1000);
@@ -110,9 +107,10 @@ function VideoCard({ video }) {
         {`
           @keyframes heart-burst {
             0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
-            15% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.9; }
+            15% { transform: translate(-50%, -50%) scale(1.3); opacity: 0.9; }
             30% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-            100% { transform: translate(-50%, -150%) scale(1.5); opacity: 0; }
+            45% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+            100% { transform: translate(-50%, -150%) scale(1.4); opacity: 0; }
           }
         `}
       </style>
@@ -143,8 +141,8 @@ function VideoCard({ video }) {
             color: "#ff0050",
             pointerEvents: "none",
             zIndex: 100,
-            animation: "heart-burst 1s ease-out forwards",
-            filter: "drop-shadow(0 0 10px rgba(0,0,0,0.5))"
+            animation: "heart-burst 0.8s ease-out forwards",
+            filter: "drop-shadow(0 0 10px rgba(0,0,0,0.8))"
           }}
         >
           ❤️
@@ -161,6 +159,13 @@ function VideoCard({ video }) {
           fontSize: "60px",
           pointerEvents: "none",
           zIndex: 10,
+          background: "rgba(0,0,0,0.3)",
+          width: "100px",
+          height: "100px",
+          borderRadius: "50%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center"
         }}>
           {isPlaying ? "▶️" : "⏸️"}
         </div>
@@ -235,4 +240,5 @@ function VideoCard({ video }) {
   );
 }
 
-export default VideoCard;
+export default VideoCard;
+efault VideoCard;
