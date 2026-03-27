@@ -241,4 +241,4 @@ function VideoCard({ video }) {
 }
 
 export default VideoCard;
-efault VideoCard;
+
