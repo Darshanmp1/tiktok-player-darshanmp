@@ -22,7 +22,7 @@ function ProgressBar({ videoRef }) {
       bottom: "0",
       left: "0",
       width: "100%",
-      height: "3px",
+      height: "4px",
       background: "rgba(0, 0, 0, 0.5)",
       zIndex: 10,
     }}>
