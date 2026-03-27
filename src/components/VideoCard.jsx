@@ -1,5 +1,6 @@
 import { useRef, useEffect, useState } from "react";
 import ActionBar from "./ActionBar";
+import ProgressBar from "./ProgressBar";
 
 function VideoCard({ video }) {
   const videoRef = useRef(null);
@@ -133,6 +134,9 @@ function VideoCard({ video }) {
 
       {/* Action Bar */}
       <ActionBar video={video} />
+
+      {/* Progress Bar */}
+      <ProgressBar videoRef={videoRef} />
     </div>
   );
 }
