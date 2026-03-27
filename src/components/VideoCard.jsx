@@ -7,7 +7,6 @@ function VideoCard({ video }) {
   const [showIcon, setShowIcon] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
 
-  // IntersectionObserver — autoplay/pause based on visibility
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -32,7 +31,6 @@ function VideoCard({ video }) {
     return () => observer.disconnect();
   }, []);
 
-  // Tap to play/pause
   const handleTap = () => {
     if (isPlaying) {
       videoRef.current.pause();
@@ -45,7 +43,6 @@ function VideoCard({ video }) {
     setTimeout(() => setShowIcon(false), 1000);
   };
 
-  // Sound toggle
   const toggleMute = (e) => {
     e.stopPropagation();
     videoRef.current.muted = !videoRef.current.muted;
@@ -57,14 +54,16 @@ function VideoCard({ video }) {
       ref={containerRef}
       onClick={handleTap}
       style={{
-        height: "100vh",
+        height: "100dvh",
+        width: "100%",
         scrollSnapAlign: "start",
         position: "relative",
         background: "#000",
         cursor: "pointer",
+        flexShrink: 0,
+        overflow:"hidden"
       }}
     >
-      {/* Video Element */}
       <video
         ref={videoRef}
         src={video.url}
@@ -75,10 +74,11 @@ function VideoCard({ video }) {
           width: "100%",
           height: "100%",
           objectFit: "cover",
+          display: "block",
         }}
       />
 
-      {/* Play/Pause Icon Overlay */}
+      {/* Play/Pause Icon */}
       {showIcon && (
         <div style={{
           position: "absolute",
@@ -86,9 +86,8 @@ function VideoCard({ video }) {
           left: "50%",
           transform: "translate(-50%, -50%)",
           fontSize: "60px",
-          opacity: showIcon ? 1 : 0,
-          transition: "opacity 0.3s ease",
           pointerEvents: "none",
+          zIndex: 10,
         }}>
           {isPlaying ? "▶️" : "⏸️"}
         </div>
@@ -115,7 +114,7 @@ function VideoCard({ video }) {
         {isMuted ? "🔇" : "🔊"}
       </button>
 
-      {/* Username bottom left */}
+      {/* User Info */}
       <div style={{
         position: "absolute",
         bottom: "80px",
@@ -130,7 +129,6 @@ function VideoCard({ video }) {
           {video.description}
         </p>
       </div>
-
     </div>
   );
 }

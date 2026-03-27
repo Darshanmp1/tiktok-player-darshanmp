@@ -27,12 +27,19 @@ function VideoFeed({ videos }) {
   }, [currentIndex, videos.length]);
 
   return (
-    <div ref={feedRef} style={{
-      height: "100vh",
-      overflowY: "scroll",
-      scrollSnapType: "y mandatory",
-      scrollbarWidth: "none",
-    }}>
+    <div
+      ref={feedRef}
+      style={{
+        height: "100dvh",
+        width: "100%",
+        maxWidth: "420px",
+        overflowY: "scroll",
+        scrollSnapType: "y mandatory",
+        scrollbarWidth: "none",
+        msOverflowStyle: "none",
+        background: "#000",
+      }}
+    >
       {videos.map((video) => (
         <VideoCard key={video.id} video={video} />
       ))}
