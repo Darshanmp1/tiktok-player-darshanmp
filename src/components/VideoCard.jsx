@@ -2,6 +2,7 @@ import { useRef, useEffect, useState } from "react";
 import ActionBar from "./ActionBar";
 import ProgressBar from "./ProgressBar";
 import MusicDisc from "./MusicDisc";
+import UserInfo from "./UserInfo";
 
 function VideoCard({ video }) {
   const videoRef = useRef(null);
@@ -10,7 +11,6 @@ function VideoCard({ video }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [showIcon, setShowIcon] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
-  const [isExpanded, setIsExpanded] = useState(false);
   const [liked, setLiked] = useState(false);
   const [hearts, setHearts] = useState([]);
 
@@ -193,40 +193,7 @@ function VideoCard({ video }) {
       </button>
 
       {/* User Info */}
-      <div style={{
-        position: "absolute",
-        bottom: "80px",
-        left: "12px",
-        color: "white",
-        zIndex: 10,
-      }}>
-        <p style={{ fontWeight: "bold", fontSize: "16px" }}>
-          @{video.user.name}
-        </p>
-        <div style={{ fontSize: "14px", opacity: 0.9, maxWidth: "250px" }}>
-          <p style={{
-            margin: 0,
-            overflow: "hidden",
-            display: "-webkit-box",
-            WebkitLineClamp: isExpanded ? "unset" : 2,
-            WebkitBoxOrient: "vertical",
-            textOverflow: "ellipsis",
-          }}>
-            {video.description}
-          </p>
-          {!isExpanded && video.description.length > 50 && (
-            <span 
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsExpanded(true);
-              }}
-              style={{ fontWeight: "bold", cursor: "pointer", display: "inline-block", marginTop: "4px" }}
-            >
-              ... more
-            </span>
-          )}
-        </div>
-      </div>
+      <UserInfo video={video} />
 
       {/* Action Bar */}
       <ActionBar video={video} liked={liked} setLiked={setLiked} />
