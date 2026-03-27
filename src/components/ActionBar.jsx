@@ -6,7 +6,7 @@ function ActionBar({ video }) {
   return (
     <div style={{
       position: "absolute",
-      right: "8px",
+      right: "18px",
       top: "50%",
       transform: "translateY(-50%)",
       display: "flex",
