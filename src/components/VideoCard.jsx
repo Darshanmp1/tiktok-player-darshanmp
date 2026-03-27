@@ -8,11 +8,15 @@ function VideoCard({ video }) {
   const videoRef = useRef(null);
   const containerRef = useRef(null);
   const tapTimeoutRef = useRef(null);
+  const longPressTimeoutRef = useRef(null);
+  const isLongPressingRef = useRef(false);
+
   const [isPlaying, setIsPlaying] = useState(false);
   const [showIcon, setShowIcon] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const [liked, setLiked] = useState(false);
   const [hearts, setHearts] = useState([]);
+  const [isHolding, setIsHolding] = useState(false);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -38,16 +42,42 @@ function VideoCard({ video }) {
     return () => observer.disconnect();
   }, []);
 
+  const handlePointerDown = (e) => {
+    isLongPressingRef.current = false;
+    longPressTimeoutRef.current = setTimeout(() => {
+      isLongPressingRef.current = true;
+      setIsHolding(true);
+      videoRef.current.pause();
+      setIsPlaying(false);
+    }, 500);
+  };
+
+  const handlePointerUp = () => {
+    if (longPressTimeoutRef.current) {
+      clearTimeout(longPressTimeoutRef.current);
+      longPressTimeoutRef.current = null;
+    }
+    if (isLongPressingRef.current) {
+      setIsHolding(false);
+      videoRef.current.play();
+      setIsPlaying(true);
+    }
+  };
+
   const handleTap = (e) => {
+    // If it was a long press, don't trigger normal tap logic
+    if (isLongPressingRef.current) {
+      isLongPressingRef.current = false;
+      return;
+    }
+
     if (e.detail === 2) {
-      // Double tap detected via native detail
       if (tapTimeoutRef.current) {
         clearTimeout(tapTimeoutRef.current);
         tapTimeoutRef.current = null;
       }
       handleDoubleTap(e);
     } else if (e.detail === 1) {
-      // Single tap - wait for a potential second tap
       tapTimeoutRef.current = setTimeout(() => {
         togglePlayPause();
         tapTimeoutRef.current = null;
@@ -69,7 +99,6 @@ function VideoCard({ video }) {
 
   const handleDoubleTap = (e) => {
     setLiked(true);
-    
     const rect = containerRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
@@ -91,6 +120,9 @@ function VideoCard({ video }) {
   return (
     <div
       ref={containerRef}
+      onPointerDown={handlePointerDown}
+      onPointerUp={handlePointerUp}
+      onPointerLeave={handlePointerUp}
       onClick={handleTap}
       style={{
         height: "100dvh",
@@ -100,7 +132,8 @@ function VideoCard({ video }) {
         background: "#000",
         cursor: "pointer",
         flexShrink: 0,
-        overflow: "hidden"
+        overflow: "hidden",
+        touchAction: "none" // Prevent default touch behaviors like scrolling while holding
       }}
     >
       <style>
@@ -129,6 +162,29 @@ function VideoCard({ video }) {
         }}
       />
 
+      {/* Long Press Hold Indicator */}
+      {isHolding && (
+        <div style={{
+          position: "absolute",
+          top: "40%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          background: "rgba(0,0,0,0.6)",
+          color: "white",
+          padding: "12px 24px",
+          borderRadius: "20px",
+          fontSize: "18px",
+          fontWeight: "bold",
+          zIndex: 100,
+          pointerEvents: "none",
+          display: "flex",
+          alignItems: "center",
+          gap: "8px"
+        }}>
+          <span style={{ fontSize: "24px" }}>⏸️</span> Paused
+        </div>
+      )}
+
       {/* Floating Hearts for Double Tap */}
       {hearts.map((heart) => (
         <div
@@ -150,7 +206,7 @@ function VideoCard({ video }) {
       ))}
 
       {/* Play/Pause Icon */}
-      {showIcon && (
+      {showIcon && !isHolding && (
         <div style={{
           position: "absolute",
           top: "50%",
