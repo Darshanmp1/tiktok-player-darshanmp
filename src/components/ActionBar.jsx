@@ -1,8 +1,6 @@
 import { useState } from "react";
 
-function ActionBar({ video }) {
-  const [liked, setLiked] = useState(false);
-
+function ActionBar({ video, liked, setLiked }) {
   return (
     <div style={{
       position: "absolute",

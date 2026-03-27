@@ -6,10 +6,13 @@ import MusicDisc from "./MusicDisc";
 function VideoCard({ video }) {
   const videoRef = useRef(null);
   const containerRef = useRef(null);
+  const lastTapRef = useRef(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [showIcon, setShowIcon] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [liked, setLiked] = useState(false);
+  const [hearts, setHearts] = useState([]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -35,7 +38,25 @@ function VideoCard({ video }) {
     return () => observer.disconnect();
   }, []);
 
-  const handleTap = () => {
+  const handleTap = (e) => {
+    const now = Date.now();
+    const DOUBLE_TAP_DELAY = 300;
+
+    if (now - lastTapRef.current < DOUBLE_TAP_DELAY) {
+      // Double tap detected
+      handleDoubleTap(e);
+    } else {
+      // Single tap logic (with a slight delay to allow double-tap)
+      setTimeout(() => {
+        if (Date.now() - lastTapRef.current >= DOUBLE_TAP_DELAY) {
+          togglePlayPause();
+        }
+      }, DOUBLE_TAP_DELAY);
+    }
+    lastTapRef.current = now;
+  };
+
+  const togglePlayPause = () => {
     if (isPlaying) {
       videoRef.current.pause();
       setIsPlaying(false);
@@ -45,6 +66,23 @@ function VideoCard({ video }) {
     }
     setShowIcon(true);
     setTimeout(() => setShowIcon(false), 1000);
+  };
+
+  const handleDoubleTap = (e) => {
+    setLiked(true);
+    
+    // Get coordinates relative to container
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    const newHeart = { id: Date.now(), x, y };
+    setHearts((prev) => [...prev, newHeart]);
+
+    // Remove heart after animation
+    setTimeout(() => {
+      setHearts((prev) => prev.filter((h) => h.id !== newHeart.id));
+    }, 1000);
   };
 
   const toggleMute = (e) => {
@@ -65,9 +103,20 @@ function VideoCard({ video }) {
         background: "#000",
         cursor: "pointer",
         flexShrink: 0,
-        overflow:"hidden"
+        overflow: "hidden"
       }}
     >
+      <style>
+        {`
+          @keyframes heart-burst {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+            15% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.9; }
+            30% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            100% { transform: translate(-50%, -150%) scale(1.5); opacity: 0; }
+          }
+        `}
+      </style>
+
       <video
         ref={videoRef}
         src={video.url}
@@ -81,6 +130,26 @@ function VideoCard({ video }) {
           display: "block",
         }}
       />
+
+      {/* Floating Hearts for Double Tap */}
+      {hearts.map((heart) => (
+        <div
+          key={heart.id}
+          style={{
+            position: "absolute",
+            left: heart.x,
+            top: heart.y,
+            fontSize: "80px",
+            color: "#ff0050",
+            pointerEvents: "none",
+            zIndex: 100,
+            animation: "heart-burst 1s ease-out forwards",
+            filter: "drop-shadow(0 0 10px rgba(0,0,0,0.5))"
+          }}
+        >
+          ❤️
+        </div>
+      ))}
 
       {/* Play/Pause Icon */}
       {showIcon && (
@@ -155,7 +224,7 @@ function VideoCard({ video }) {
       </div>
 
       {/* Action Bar */}
-      <ActionBar video={video} />
+      <ActionBar video={video} liked={liked} setLiked={setLiked} />
 
       {/* Progress Bar */}
       <ProgressBar videoRef={videoRef} />
@@ -166,4 +235,4 @@ function VideoCard({ video }) {
   );
 }
 
-export default VideoCard;
+export default VideoCard;
