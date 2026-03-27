@@ -28,7 +28,7 @@ function VideoCard({ video }) {
         entries.forEach((entry) => {
           setIsIntersecting(entry.isIntersecting);
           if (entry.isIntersecting) {
-            videoElem.play();
+            videoElem.play().catch(() => {});
             setIsPlaying(true);
           } else {
             videoElem.pause();
@@ -93,7 +93,7 @@ function VideoCard({ video }) {
     }
     if (isLongPressingRef.current) {
       setIsHolding(false);
-      videoRef.current.play();
+      videoRef.current.play().catch(() => {});
       setIsPlaying(true);
     }
   };
@@ -123,7 +123,7 @@ function VideoCard({ video }) {
       videoRef.current.pause();
       setIsPlaying(false);
     } else {
-      videoRef.current.play();
+      videoRef.current.play().catch(() => {});
       setIsPlaying(true);
     }
     setShowIcon(true);

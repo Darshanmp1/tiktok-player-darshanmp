@@ -1,5 +1,3 @@
-import { useState } from "react";
-
 function ActionBar({ video, liked, setLiked }) {
   return (
     <div style={{

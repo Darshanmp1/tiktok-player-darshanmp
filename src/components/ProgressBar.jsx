@@ -14,7 +14,7 @@ function ProgressBar({ videoRef }) {
 
     video.addEventListener("timeupdate", handleTimeUpdate);
     return () => video.removeEventListener("timeupdate", handleTimeUpdate);
-  }, [videoRef]);
+  }, []);
 
   return (
     <div style={{
