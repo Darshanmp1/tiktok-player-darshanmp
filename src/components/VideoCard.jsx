@@ -17,17 +17,20 @@ function VideoCard({ video }) {
   const [liked, setLiked] = useState(false);
   const [hearts, setHearts] = useState([]);
   const [isHolding, setIsHolding] = useState(false);
+  const [isBuffering, setIsBuffering] = useState(false);
 
   useEffect(() => {
+    const videoElem = videoRef.current;
+    
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            videoRef.current.play();
+            videoElem.play();
             setIsPlaying(true);
           } else {
-            videoRef.current.pause();
-            videoRef.current.currentTime = 0;
+            videoElem.pause();
+            videoElem.currentTime = 0;
             setIsPlaying(false);
           }
         });
@@ -39,7 +42,23 @@ function VideoCard({ video }) {
       observer.observe(containerRef.current);
     }
 
-    return () => observer.disconnect();
+    // Buffering listeners
+    const handleWaiting = () => setIsBuffering(true);
+    const handlePlaying = () => setIsBuffering(false);
+    const handleCanPlay = () => setIsBuffering(false);
+
+    videoElem.addEventListener("waiting", handleWaiting);
+    videoElem.addEventListener("playing", handlePlaying);
+    videoElem.addEventListener("canplay", handleCanPlay);
+    videoElem.addEventListener("stalled", handleWaiting);
+
+    return () => {
+      observer.disconnect();
+      videoElem.removeEventListener("waiting", handleWaiting);
+      videoElem.removeEventListener("playing", handlePlaying);
+      videoElem.removeEventListener("canplay", handleCanPlay);
+      videoElem.removeEventListener("stalled", handleWaiting);
+    };
   }, []);
 
   const handlePointerDown = (e) => {
@@ -65,7 +84,6 @@ function VideoCard({ video }) {
   };
 
   const handleTap = (e) => {
-    // If it was a long press, don't trigger normal tap logic
     if (isLongPressingRef.current) {
       isLongPressingRef.current = false;
       return;
@@ -133,7 +151,7 @@ function VideoCard({ video }) {
         cursor: "pointer",
         flexShrink: 0,
         overflow: "hidden",
-        touchAction: "none" // Prevent default touch behaviors like scrolling while holding
+        touchAction: "none"
       }}
     >
       <style>
@@ -144,6 +162,14 @@ function VideoCard({ video }) {
             30% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
             45% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
             100% { transform: translate(-50%, -150%) scale(1.4); opacity: 0; }
+          }
+          @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+          }
+          @keyframes spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
           }
         `}
       </style>
@@ -161,6 +187,54 @@ function VideoCard({ video }) {
           display: "block",
         }}
       />
+
+      {/* Skeleton / Buffering Overlay */}
+      {isBuffering && (
+        <div style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          background: "#121212",
+          zIndex: 5,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "flex-end",
+          padding: "20px",
+          boxSizing: "border-box"
+        }}>
+          <div style={{
+            width: "60%",
+            height: "15px",
+            background: "linear-gradient(90deg, #222 25%, #333 50%, #222 75%)",
+            backgroundSize: "200% 100%",
+            animation: "shimmer 1.5s infinite linear",
+            borderRadius: "4px",
+            marginBottom: "10px"
+          }} />
+          <div style={{
+            width: "40%",
+            height: "15px",
+            background: "linear-gradient(90deg, #222 25%, #333 50%, #222 75%)",
+            backgroundSize: "200% 100%",
+            animation: "shimmer 1.5s infinite linear",
+            borderRadius: "4px"
+          }} />
+          <div style={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: "40px",
+            height: "40px",
+            border: "4px solid rgba(255,255,255,0.1)",
+            borderTop: "4px solid white",
+            borderRadius: "50%",
+            animation: "spin 1s infinite linear"
+          }} />
+        </div>
+      )}
 
       {/* Long Press Hold Indicator */}
       {isHolding && (
