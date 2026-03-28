@@ -6,7 +6,7 @@ Hey! Welcome to my TikTok-style vertical video player built with **React** and *
 
 ### Important Links
 - **Demo Video**: [Watch Demo](https://drive.google.com/file/d/1lYccogIAiUQZOIYU6K2xvQPq6p6p3vQB/view?usp=sharing)
-- **Live App**: [coming soon — will add after Vercel deployment]
+- **Live App**: [https://tiktok-player-darshanmp1.vercel.app](https://tiktok-player-darshanmp1.vercel.app)
 - **GitHub**: [Darshanmp1/tiktok-player-darshanmp](https://github.com/Darshanmp1/tiktok-player-darshanmp)
 
 ---
