@@ -5,6 +5,7 @@ function VideoFeed({ videos }) {
   const feedRef = useRef(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const touchStartY = useRef(null);
+  const [isMuted, setIsMuted] = useState(true);
 
   // Keyboard navigation
   useEffect(() => {
@@ -50,6 +51,11 @@ function VideoFeed({ videos }) {
     }
   };
 
+  const toggleMute = (e) => {
+    if (e) e.stopPropagation();
+    setIsMuted((prev) => !prev);
+  };
+
   return (
     <div
       ref={feedRef}
@@ -67,7 +73,12 @@ function VideoFeed({ videos }) {
       }}
     >
       {videos.map((video) => (
-        <VideoCard key={video.id} video={video} />
+        <VideoCard 
+          key={video.id} 
+          video={video} 
+          isMuted={isMuted} 
+          toggleMute={toggleMute} 
+        />
       ))}
     </div>
   );

@@ -4,7 +4,7 @@ import ProgressBar from "./ProgressBar";
 import MusicDisc from "./MusicDisc";
 import UserInfo from "./UserInfo";
 
-function VideoCard({ video }) {
+function VideoCard({ video, isMuted, toggleMute }) {
   const videoRef = useRef(null);
   const containerRef = useRef(null);
   const tapTimeoutRef = useRef(null);
@@ -13,12 +13,18 @@ function VideoCard({ video }) {
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [showIcon, setShowIcon] = useState(false);
-  const [isMuted, setIsMuted] = useState(true);
+
   const [liked, setLiked] = useState(false);
   const [hearts, setHearts] = useState([]);
   const [isHolding, setIsHolding] = useState(false);
   const [isBuffering, setIsBuffering] = useState(false);
   const [isIntersecting, setIsIntersecting] = useState(false);
+
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.muted = isMuted;
+    }
+  }, [isMuted]);
 
   useEffect(() => {
     const videoElem = videoRef.current;
@@ -144,11 +150,7 @@ function VideoCard({ video }) {
     }, 1000);
   };
 
-  const toggleMute = (e) => {
-    e.stopPropagation();
-    videoRef.current.muted = !videoRef.current.muted;
-    setIsMuted(!isMuted);
-  };
+
 
   return (
     <div
@@ -193,7 +195,7 @@ function VideoCard({ video }) {
         ref={videoRef}
         src={video.url}
         loop
-        muted
+        muted={isMuted}
         playsInline
         style={{
           width: "100%",
