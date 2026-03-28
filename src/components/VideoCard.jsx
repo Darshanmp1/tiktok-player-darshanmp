@@ -4,7 +4,7 @@ import ProgressBar from "./ProgressBar";
 import MusicDisc from "./MusicDisc";
 import UserInfo from "./UserInfo";
 
-function VideoCard({ video, isMuted, toggleMute }) {
+function VideoCard({ video, isMuted, toggleMute, onNext }) {
   const videoRef = useRef(null);
   const containerRef = useRef(null);
   const tapTimeoutRef = useRef(null);
@@ -50,15 +50,19 @@ function VideoCard({ video, isMuted, toggleMute }) {
       observer.observe(containerRef.current);
     }
 
-    // Buffering listeners
+    // Buffering and ended listeners
     const handleWaiting = () => setIsBuffering(true);
     const handlePlaying = () => setIsBuffering(false);
     const handleCanPlay = () => setIsBuffering(false);
+    const handleEnded = () => {
+      if (onNext) onNext();
+    };
 
     videoElem.addEventListener("waiting", handleWaiting);
     videoElem.addEventListener("playing", handlePlaying);
     videoElem.addEventListener("canplay", handleCanPlay);
     videoElem.addEventListener("stalled", handleWaiting);
+    videoElem.addEventListener("ended", handleEnded);
 
     return () => {
       observer.disconnect();
@@ -66,15 +70,18 @@ function VideoCard({ video, isMuted, toggleMute }) {
       videoElem.removeEventListener("playing", handlePlaying);
       videoElem.removeEventListener("canplay", handleCanPlay);
       videoElem.removeEventListener("stalled", handleWaiting);
+      videoElem.removeEventListener("ended", handleEnded);
     };
-  }, []);
+  }, [onNext]);
 
   // Global Keydown Listener for Space Bar
   useEffect(() => {
     const handleGlobalKeyDown = (e) => {
-      if (e.code === "Space" && isIntersecting) {
+      if (e.code === "Space") {
         e.preventDefault();
-        togglePlayPause();
+        if (isIntersecting) {
+          togglePlayPause();
+        }
       }
     };
 

@@ -4,11 +4,14 @@ import { formatCount } from "../utils";
 function ActionBar({ video, liked, setLiked }) {
   const [commentCount, setCommentCount] = useState(0);
   const [isCommenting, setIsCommenting] = useState(false);
+  const [isCommented, setIsCommented] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
 
   const handleComment = (e) => {
     e.stopPropagation();
-    setCommentCount((prev) => prev + 1);
+    const newIsCommented = !isCommented;
+    setIsCommented(newIsCommented);
+    setCommentCount((prev) => newIsCommented ? prev + 1 : prev - 1);
     setIsCommenting(true);
     setTimeout(() => setIsCommenting(false), 200);
   };
@@ -57,12 +60,22 @@ function ActionBar({ video, liked, setLiked }) {
         style={{ display: "flex", flexDirection: "column", alignItems: "center", cursor: "pointer" }}
         onClick={handleComment}
       >
-        <span style={{ 
-          fontSize: "28px", 
-          filter: "brightness(0) invert(1)",
-          transition: "transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
-          transform: isCommenting ? "scale(1.2)" : "scale(1)",
-        }}>💬</span>
+        <svg 
+          width="28" 
+          height="28" 
+          viewBox="0 0 24 24" 
+          fill={isCommented ? "white" : "none"} 
+          stroke="white" 
+          strokeWidth="2"
+          strokeLinecap="round" 
+          strokeLinejoin="round"
+          style={{
+            transition: "transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), fill 0.2s ease",
+            transform: isCommenting ? "scale(1.2)" : "scale(1)"
+          }}
+        >
+          <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+        </svg>
         <span style={{ fontSize: "12px", color: "white", marginTop: "4px" }}>
           {formatCount(video.comments + commentCount)}
         </span>

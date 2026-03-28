@@ -1,8 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 function UserInfo({ video }) {
   const [isFollowing, setIsFollowing] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+
+  // Reset expanded state when video changes
+  useEffect(() => {
+    setIsExpanded(false);
+  }, [video.id]);
 
   const renderCaption = (text) => {
     return text.split(" ").map((word, i) => {
@@ -24,7 +29,7 @@ function UserInfo({ video }) {
   return (
     <div style={{
       position: "absolute",
-      bottom: "80px",
+      bottom: "20px",
       left: "12px",
       color: "white",
       zIndex: 10,
@@ -80,28 +85,32 @@ function UserInfo({ video }) {
       </p>
 
       {/* Caption/Description with Hashtag Highlighting */}
-      <div style={{ fontSize: "14px", opacity: 0.9, maxWidth: "250px" }}>
+      <div style={{ maxWidth: "250px" }}>
         <p style={{
           margin: 0,
-          overflow: "hidden",
-          display: "-webkit-box",
-          WebkitLineClamp: isExpanded ? "unset" : 2,
-          WebkitBoxOrient: "vertical",
-          textOverflow: "ellipsis",
+          fontSize: "14px",
+          opacity: 0.9,
+          lineHeight: "1.4",
         }}>
-          {renderCaption(video.description)}
+          {renderCaption(isExpanded ? video.description : video.description.slice(0, 80))}
+          {video.description.length > 80 && (
+            <span 
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsExpanded(!isExpanded);
+              }}
+              style={{ 
+                fontWeight: "bold", 
+                cursor: "pointer", 
+                display: "inline", 
+                marginLeft: "4px",
+                color: "rgba(255,255,255,0.8)"
+              }}
+            >
+              {isExpanded ? " ... less" : " ... more"}
+            </span>
+          )}
         </p>
-        {!isExpanded && video.description.length > 50 && (
-          <span 
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsExpanded(true);
-            }}
-            style={{ fontWeight: "bold", cursor: "pointer", display: "inline-block", marginTop: "4px" }}
-          >
-            ... more
-          </span>
-        )}
       </div>
     </div>
   );

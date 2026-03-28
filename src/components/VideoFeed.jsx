@@ -9,7 +9,7 @@ function VideoFeed({ videos }) {
 
   const scrollToVideo = (index, smooth = true) => {
     const container = feedRef.current;
-    if (!container) return;
+    if (!container || !container.children[index]) return;
 
     if (!smooth) {
       container.style.scrollBehavior = "auto";
@@ -22,7 +22,11 @@ function VideoFeed({ videos }) {
     } else {
       container.children[index].scrollIntoView({ behavior: "smooth" });
     }
-    setCurrentIndex(index);
+    
+    // Map DOM index (1 to videos.length) back to reel index (0 to videos.length-1)
+    if (index >= 1 && index <= videos.length) {
+      setCurrentIndex(index - 1);
+    }
   };
 
   // Keyboard navigation
@@ -30,27 +34,26 @@ function VideoFeed({ videos }) {
     const handleKeyDown = (e) => {
       if (e.code === "ArrowDown") {
         e.preventDefault();
-        const next = (currentIndex + 1) % videos.length;
-        if (currentIndex === videos.length - 1) {
-          scrollToVideo(0, false);
-        } else {
-          scrollToVideo(next, true);
-        }
+        // Scroll to next (current + 1 + 1 for clone offset)
+        scrollToVideo(currentIndex + 2, true);
       }
       if (e.code === "ArrowUp") {
         e.preventDefault();
-        const prev = (currentIndex - 1 + videos.length) % videos.length;
-        if (currentIndex === 0) {
-          scrollToVideo(videos.length - 1, false);
-        } else {
-          scrollToVideo(prev, true);
-        }
+        // Scroll to prev (current - 1 + 1 for clone offset)
+        scrollToVideo(currentIndex, true);
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [currentIndex, videos.length]);
+
+  // Initial scroll to first video (index 1)
+  useEffect(() => {
+    if (feedRef.current && videos.length > 0) {
+      scrollToVideo(1, false);
+    }
+  }, []);
 
   // Swipe gesture navigation
   const handleTouchStart = (e) => {
@@ -64,20 +67,10 @@ function VideoFeed({ videos }) {
 
     if (deltaY < -50) {
       // Swipe up → next video
-      const next = (currentIndex + 1) % videos.length;
-      if (currentIndex === videos.length - 1) {
-        scrollToVideo(0, false);
-      } else {
-        scrollToVideo(next, true);
-      }
+      scrollToVideo(currentIndex + 2, true);
     } else if (deltaY > 50) {
       // Swipe down → previous video
-      const prev = (currentIndex - 1 + videos.length) % videos.length;
-      if (currentIndex === 0) {
-        scrollToVideo(videos.length - 1, false);
-      } else {
-        scrollToVideo(prev, true);
-      }
+      scrollToVideo(currentIndex, true);
     }
   };
 
@@ -89,26 +82,32 @@ function VideoFeed({ videos }) {
   const handleScroll = (e) => {
     const container = e.target;
     if (!container) return;
-    const index = Math.round(container.scrollTop / container.clientHeight);
-    if (currentIndex !== index) {
-      setCurrentIndex(index);
+    
+    const scrollPos = container.scrollTop / container.clientHeight;
+    const index = Math.round(scrollPos);
+
+    // Seamless Wrap Logic: 
+    // If we've settled on the end-clone (last video + 1), jump back to real video 1
+    if (Math.abs(scrollPos - (videos.length + 1)) < 0.01) {
+      scrollToVideo(1, false);
+      return;
+    }
+    
+    // If we've settled on the start-clone (index 0), jump back to real video 5
+    if (Math.abs(scrollPos - 0) < 0.01) {
+      scrollToVideo(videos.length, false);
+      return;
+    }
+
+    // Map DOM index back to reel index (0 to videos.length-1)
+    const reelIndex = index - 1;
+    if (currentIndex !== reelIndex && reelIndex >= 0 && reelIndex < videos.length) {
+      setCurrentIndex(reelIndex);
     }
   };
 
   const handleWheel = (e) => {
-    const container = feedRef.current;
-    if (!container) return;
-    
-    const isAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 1;
-    const isAtTop = container.scrollTop <= 0;
-
-    if (e.deltaY > 0 && isAtBottom) {
-      e.preventDefault();
-      scrollToVideo(0, false);
-    } else if (e.deltaY < 0 && isAtTop) {
-      e.preventDefault();
-      scrollToVideo(videos.length - 1, false);
-    }
+    // Rely on native snapping and handleScroll for wrapping logic
   };
 
   return (
@@ -129,14 +128,37 @@ function VideoFeed({ videos }) {
         background: "#000",
       }}
     >
-      {videos.map((video) => (
+      {/* Clone of last video for seamless upward wrap */}
+      {videos.length > 0 && (
+        <VideoCard 
+          key="start-clone" 
+          video={videos[videos.length - 1]} 
+          isMuted={isMuted} 
+          toggleMute={toggleMute} 
+          onNext={() => scrollToVideo(currentIndex + 2, true)}
+        />
+      )}
+
+      {videos.map((video, idx) => (
         <VideoCard 
           key={video.id} 
           video={video} 
           isMuted={isMuted} 
           toggleMute={toggleMute} 
+          onNext={() => scrollToVideo(currentIndex + 2, true)}
         />
       ))}
+
+      {/* Clone of first video for seamless downward wrap */}
+      {videos.length > 0 && (
+        <VideoCard 
+          key="end-clone" 
+          video={videos[0]} 
+          isMuted={isMuted} 
+          toggleMute={toggleMute} 
+          onNext={() => scrollToVideo(currentIndex + 2, true)}
+        />
+      )}
     </div>
   );
 }
