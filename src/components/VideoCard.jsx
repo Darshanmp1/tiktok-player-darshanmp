@@ -201,7 +201,6 @@ function VideoCard({ video, isMuted, toggleMute, onNext }) {
       <video
         ref={videoRef}
         src={video.url}
-        loop
         muted={isMuted}
         playsInline
         style={{

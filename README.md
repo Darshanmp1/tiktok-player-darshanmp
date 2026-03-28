@@ -1,83 +1,112 @@
 # TikTok-Style Vertical Video Player
 
-A TikTok-style vertical video player built with **React 18** and **Vite**. Features smooth scroll-snap navigation, gesture controls, and a premium dark UI — all without any external libraries.
+Hey! Welcome to my TikTok-style vertical video player built with **React** and **Vite**. I wanted to build a smooth, immersive scrolling experience with all the native gesture controls and a premium dark UI—all completely from scratch without relying on heavy external video libraries.
 
-![React](https://img.shields.io/badge/React-18-blue) ![Vite](https://img.shields.io/badge/Vite-5-purple) ![License](https://img.shields.io/badge/License-MIT-green)
+![React](https://img.shields.io/badge/React-18%2B-blue) ![Vite](https://img.shields.io/badge/Vite-5-purple) ![License](https://img.shields.io/badge/License-MIT-green)
+
+### Important Links
+- **Demo Video**: [Watch Demo](https://drive.google.com/file/d/1lYccogIAiUQZOIYU6K2xvQPq6p6p3vQB/view?usp=sharing)
+- **Live App**: [coming soon — will add after Vercel deployment]
+- **GitHub**: [Darshanmp1/tiktok-player-darshanmp](https://github.com/Darshanmp1/tiktok-player-darshanmp)
+
+---
 
 ## Quick Start
 
+Want to run it locally? It takes less than a minute:
+
 ```bash
+git clone https://github.com/Darshanmp1/tiktok-player-darshanmp.git
+cd tiktok-player-darshanmp
 npm install
 npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173) in your browser.
+Then just open [http://localhost:5173](http://localhost:5173) in your browser.
 
-## Features
+---
 
-### Core
-- **Vertical Video Feed** — Full-screen portrait videos with scroll-snap navigation
-- **Auto-play / Auto-pause** — Only the visible video plays (IntersectionObserver)
-- **Tap to Play/Pause** — Single tap toggles playback with icon overlay
-- **Mute/Unmute** — Sound toggle button (top-right)
-- **Progress Bar** — Real-time playback progress at the bottom
+## What's Inside?
 
-### Interactions
-- **Double-tap to Like** — ❤️ heart burst animation at tap position
-- **Long-press to Pause** — Hold 500ms to pause with overlay, release to resume
-- **Follow Button** — Toggleable +/✓ button on user avatar
-- **Action Bar** — Like, Comment, Bookmark, Share with animated states
+### 🎬 Core Features
+- **Vertical Video Feed** — Full-screen portrait player with native scroll-snap navigation.
+- **Smart Auto-Play** — Uses `IntersectionObserver` to only play the video you're actually looking at, pausing the rest.
+- **Minimum 5 Videos** — Comes pre-loaded with mock data so you can test it immediately.
+- **True Infinite Loop** — You can keep scrolling forever. It seamlessly wraps the videos around without any jarring jumps.
+- **Tap to Play/Pause** — Tap anywhere on the video to play or pause, complete with a quick fading playback icon overlay.
+- **Progress Bar** — A real-time timeline at the bottom showing how much of the video is left.
+- **Like, Comment, Share** — A fully hooked-up action bar (likes actually increment/decrement the counter dynamically).
+- **User Info Block** — Cleanly displays the creator's username and their caption at the bottom left.
+- **Smart Captions** — Captions cleanly truncate after 2 lines to save space.
+- **Spinning Vinyl** — A classic spinning music disc in the bottom right corner that actually stops when the video pauses.
+- **Mute/Unmute** — Simple button at the top to toggle sound.
 
-### Navigation
-- **Scroll Snap** — Smooth vertical snap between videos
-- **Arrow Keys** — Up/Down arrow keys to navigate videos
-- **Space Bar** — Toggle play/pause (prevents default scroll)
-- **Swipe Gestures** — Touch swipe up/down for mobile navigation
+### ✨ Bonus Features
+- **Double-Tap to Like** — Just like the real app, double-tap anywhere to spawn an animated ❤️ right where your finger landed.
+- **Follow Button** — The user's avatar has a little `+` button that turns into a checkmark when clicked.
+- **Long-Press to Pause** — Click and hold the screen to peek at the video cleanly paused without UI interruptions.
+- **Skeleton Loading** — While a video buffers, you'll see a cool pulsing shimmer effect.
+- **Responsive Design** — Looks exactly like a mobile app on desktop (capped at 420px width), but takes over the whole screen gracefully on actual mobile devices.
+- **Dark & Light Mode** — Because every good app needs a dark mode! Toggles instantly from the top menu.
+- **Keyboard Friendly** — You can navigate the feed using the `Up`/`Down` arrows and hit `Space` to pause.
 
-### Polish
-- **K/M Count Formatting** — Large numbers display as 1.2K, 5.6K, 12K etc.
-- **Hashtag Highlighting** — #hashtags render in TikTok teal (#69C9D0)
-- **Caption Truncation** — 2-line limit with expandable "... more"
-- **Music Disc** — Spinning vinyl animation (pauses with video)
-- **Skeleton Loader** — Shimmer effect during video buffering
-- **Dark/Light Mode** — Theme toggle with localStorage persistence
-- **Responsive Layout** — Centered 420px column on desktop, full-width on mobile
+### 🚀 Extra Fun Details
+Because I wanted this to feel really polished, I went slightly beyond the original requirements and added a few extras:
+- **Seekable Timeline** — You can grab the progress bar and drag it to scrub through the video seamlessly.
+- **Auto-Advance** — When a video finishes naturally, the player automatically scrolls down to the next one for you.
+- **Interactive UI Updates** — The comment icon fills in solid white when you tap it.
+- **Inline Caption Expand** — Clicking "...more" or "...less" works fluidly inline with the text.
+- **Custom Swipe Gestures** — I wrote custom touch-event logic to make flicking between videos feel super snappy on mobile.
+- **Formatted Numbers** — Views and likes read cleanly as `5.6K` or `1.2M` instead of raw long numbers.
+- **Hashtag Styling** — Any `#hashtag` in the caption automatically highlights in TikTok's signature teal color.
 
-## Tech Stack
+---
 
-| Technology | Purpose |
+## Tech Stack & How It Was Built
+
+I kept the stack lean on purpose. The goal was performance and clean React fundamentals over relying on "magic" third-party packages.
+
+| Tech | Why I chose it |
 |---|---|
-| React 18 | UI framework (functional components + hooks only) |
-| Vite 5 | Build tool and dev server |
-| HTML5 `<video>` | Native video playback (no external libraries) |
-| CSS-in-JS (inline) | All styling via React inline styles |
-| CSS @keyframes | Animations (heart burst, shimmer, spin) |
-| IntersectionObserver | Viewport-based auto-play/pause |
-| localStorage | Theme persistence |
+| **React 18**| Built entirely with pure functional components and Hooks (`useState`, `useEffect`, `useRef`). |
+| **Vite** | For insanely fast startup times and HMR during development. |
+| **Native `<video>`** | Handled natively by HTML5 to keep bundle sizes tiny and let the device hardware do the heavy lifting. |
+| **IntersectionObserver** | Much better for performance than listening to raw `onScroll` events to figure out what video is currently visible. |
+| **Vanilla CSS** | All styling and keyframe animations (like the floating hearts) are done natively without huge UI libraries. |
 
-## Project Structure
-
+### The Component Tree
+To keep the codebase maintainable, everything is strictly separated by its job:
 ```
 src/
-├── App.jsx              # Root component + dark mode toggle
-├── main.jsx             # React entry point
-├── index.css            # Global resets + scrollbar hiding
-├── utils.js             # formatCount() utility
+├── App.jsx              # The main wrapper and theme provider
+├── index.css            # Global resets and hiding scrollbars globally
 ├── data/
-│   └── videos.js        # Video data (URLs, user info, counts)
+│   └── videos.js        # Our mock database (video URLs, usernames, stats)
 └── components/
-    ├── VideoFeed.jsx     # Scrollable feed container + keyboard/swipe nav
-    ├── VideoCard.jsx     # Individual video player + gesture handlers
-    ├── ActionBar.jsx     # Like/Comment/Bookmark/Share buttons
-    ├── UserInfo.jsx      # Avatar, follow button, caption with hashtags
-    ├── ProgressBar.jsx   # Real-time playback progress
-    └── MusicDisc.jsx     # Spinning vinyl disc animation
+    ├── VideoFeed.jsx     # The brain: handles scrolling, the infinite loop clones, and keyboard nav
+    ├── VideoCard.jsx     # The player: holds the actual <video> tag and reads your taps/gestures
+    ├── ActionBar.jsx     # Just the buttons on the right side
+    ├── UserInfo.jsx      # Just the text block and avatar on the left
+    ├── ProgressBar.jsx   # Dedicated component to handle scrubbing math and UI
+    └── MusicDisc.jsx     # Independent spinning animation component
 ```
 
-## Design Decisions
+### Note on Git History
+I tried to keep a very clean, disciplined Git history during this project. Instead of dumping massive batches of unrelated code into a single save, I wrote atomic commits. Every feature (like adding the progress bar) or bug fix has its own clear commit label so the project's evolution is easy to track.
 
-- **No external libraries** — All gestures, animations, and state management use vanilla React + browser APIs
-- **Component decomposition** — Each UI concern is its own focused component
-- **useRef for DOM** — Video elements and timers use refs, not state
-- **Proper cleanup** — All event listeners and observers are cleaned up in useEffect return functions
-- **Promise handling** — All `.play()` calls wrapped with `.catch()` to handle autoplay policy rejections
+---
+
+## Adding Your Own Videos
+Want to test it with your own clips? It's super easy:
+1. Drop any `.mp4` file into the `/public/videos/` folder (e.g., `my-cat.mp4`).
+2. Open `/src/data/videos.js`.
+3. Add a new block into the array mimicking the others. Just point the `url` to `"/videos/my-cat.mp4"`.
+4. Refresh, and it will immediately show up in the feed!
+
+---
+
+## Known Limitations
+*I want to be fully transparent about what this current version handles and what it doesn't:*
+1. **No Real Backend Yet**: Likes, comments, and follow states are just saved in local React state right now. If you refresh the page, they reset. A real backend (like Firebase or Node/Express) would be needed to permanently save this data across sessions.
+2. **Browser Autoplay Rules**: Browsers (especially Safari and Chrome) get very strict about letting videos play automatically with sound. To prevent the app from breaking on load, videos start muted by default until you interact with the page.
+3. **Local File Loading**: Currently, the videos are loaded directly as raw files. A true production app would stream them progressively in chunks (like HLS `.m3u8` feeds) from a super-fast CDN to save bandwidth, rather than forcing the browser to load the entire `.mp4` at once.

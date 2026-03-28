@@ -3,9 +3,11 @@ import { useEffect, useState, useRef } from "react";
 function ProgressBar({ videoRef }) {
   const [progress, setProgress] = useState(0);
   const [isHovering, setIsHovering] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
   const progressBarRef = useRef(null);
-  const wasPlayingRef = useRef(false);
+  
+  // Use refs for drag state to avoid stale closures and state sync issues
+  const isDragging = useRef(false);
+  const wasPlaying = useRef(false);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -13,7 +15,7 @@ function ProgressBar({ videoRef }) {
 
     const handleTimeUpdate = () => {
       // Don't update visual position from timeupdate while actively dragging
-      if (!isDragging && video.duration) {
+      if (!isDragging.current && video.duration) {
         const percentage = (video.currentTime / video.duration) * 100;
         setProgress(percentage);
       }
@@ -21,7 +23,7 @@ function ProgressBar({ videoRef }) {
 
     video.addEventListener("timeupdate", handleTimeUpdate);
     return () => video.removeEventListener("timeupdate", handleTimeUpdate);
-  }, [videoRef, isDragging]);
+  }, [videoRef]);
 
   const seekToPosition = (clientX) => {
     const bar = progressBarRef.current;
@@ -32,67 +34,83 @@ function ProgressBar({ videoRef }) {
     const x = Math.max(0, Math.min(clientX - rect.left, width));
     const percentage = x / width;
     
-    // Update visual state immediately for a smooth experience
+    // Update visual state immediately
     setProgress(percentage * 100);
     
     // Update video time
     videoRef.current.currentTime = percentage * videoRef.current.duration;
   };
 
-  const handlePointerDown = (e) => {
-    e.stopPropagation();
-    e.preventDefault();
-    
-    const video = videoRef.current;
-    if (video) {
-      wasPlayingRef.current = !video.paused;
-      video.pause();
-    }
-    
-    setIsDragging(true);
+  const handlePointerMove = (e) => {
+    if (!isDragging.current) return;
+    // Prevent scrolling on mobile during drag
+    if (e.type === 'touchmove') e.preventDefault();
     const clientX = e.clientX ?? e.touches?.[0]?.clientX;
     seekToPosition(clientX);
   };
 
-  useEffect(() => {
-    const handlePointerMove = (e) => {
-      if (isDragging) {
-        // Prevent scrolling on mobile during drag
-        if (e.type === 'touchmove') e.preventDefault();
-        const clientX = e.clientX ?? e.touches?.[0]?.clientX;
-        seekToPosition(clientX);
-      }
-    };
+  const handlePointerUp = () => {
+    if (!isDragging.current) return;
+    isDragging.current = false;
+    
+    document.removeEventListener("mousemove", handlePointerMove);
+    document.removeEventListener("mouseup", handlePointerUp);
+    document.removeEventListener("touchmove", handlePointerMove);
+    document.removeEventListener("touchend", handlePointerUp);
 
-    const handlePointerUp = () => {
-      if (isDragging) {
-        if (wasPlayingRef.current && videoRef.current) {
-          videoRef.current.play().catch(() => {});
-        }
-        setIsDragging(false);
-      }
-    };
-
-    if (isDragging) {
-      window.addEventListener("mousemove", handlePointerMove);
-      window.addEventListener("mouseup", handlePointerUp);
-      window.addEventListener("touchmove", handlePointerMove, { passive: false });
-      window.addEventListener("touchend", handlePointerUp);
+    if (wasPlaying.current && videoRef.current) {
+      videoRef.current.play().catch(() => {});
     }
+  };
 
+  const handlePointerDown = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    
+    if (videoRef.current) {
+      wasPlaying.current = !videoRef.current.paused;
+    }
+    
+    isDragging.current = true;
+    const clientX = e.clientX ?? e.touches?.[0]?.clientX;
+    seekToPosition(clientX);
+
+    // Attach to document so dragging outside the bar still works
+    document.addEventListener("mousemove", handlePointerMove);
+    document.addEventListener("mouseup", handlePointerUp);
+    document.addEventListener("touchmove", handlePointerMove, { passive: false });
+    document.addEventListener("touchend", handlePointerUp);
+  };
+
+  // Cleanup in case component unmounts while dragging
+  useEffect(() => {
     return () => {
-      window.removeEventListener("mousemove", handlePointerMove);
-      window.removeEventListener("mouseup", handlePointerUp);
-      window.removeEventListener("touchmove", handlePointerMove);
-      window.removeEventListener("touchend", handlePointerUp);
+      document.removeEventListener("mousemove", handlePointerMove);
+      document.removeEventListener("mouseup", handlePointerUp);
+      document.removeEventListener("touchmove", handlePointerMove);
+      document.removeEventListener("touchend", handlePointerUp);
     };
-  }, [isDragging]);
+  }, []);
 
   return (
     <div 
       ref={progressBarRef}
-      onMouseDown={handlePointerDown}
-      onTouchStart={handlePointerDown}
+      onPointerDown={handlePointerDown}
+      onPointerUp={(e) => {
+        e.stopPropagation();
+        handlePointerUp();
+      }}
+      onMouseUp={(e) => {
+        e.stopPropagation();
+        handlePointerUp();
+      }}
+      onTouchEnd={(e) => {
+        e.stopPropagation();
+        handlePointerUp();
+      }}
+      onClick={(e) => { e.stopPropagation(); e.preventDefault(); }}
+      onMouseDown={(e) => e.stopPropagation()}
+      onTouchStart={(e) => e.stopPropagation()}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
       style={{
@@ -100,7 +118,7 @@ function ProgressBar({ videoRef }) {
         bottom: "0",
         left: "0",
         width: "100%",
-        height: isHovering || isDragging ? "8px" : "4px",
+        height: isHovering || isDragging.current ? "8px" : "4px",
         background: "rgba(0, 0, 0, 0.5)",
         zIndex: 100,
         cursor: "pointer",
@@ -115,10 +133,10 @@ function ProgressBar({ videoRef }) {
         height: "100%",
         background: "#ffffff",
         position: "relative",
-        transition: isDragging ? "none" : "width 0.1s linear"
+        transition: isDragging.current ? "none" : "width 0.1s linear"
       }}>
         {/* Seek Thumb / Dot */}
-        {(isHovering || isDragging) && (
+        {(isHovering || isDragging.current) && (
           <div style={{
             position: "absolute",
             right: "-6px",
